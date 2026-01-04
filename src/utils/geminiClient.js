@@ -1,20 +1,34 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-
-export const analyzeCV = async (cvText, jobDescription) => {
+const callBackend = async (prompt, systemInstruction) => {
     try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            systemInstruction: `You are a hiring manager and recruiter for this specific role. Today's date is ${new Date().toLocaleDateString()}. You are reviewing CVs quickly and deciding who to interview. You scan CVs quickly and reject weak ones without hesitation. Be strict, realistic, and specific. Your goal is to help this candidate improve enough to be interview-worthy. You MUST respond in valid JSON format.`
-        }, {
-            generationConfig: {
-                responseMimeType: "application/json"
-            }
+        const response = await fetch('/api/analyze', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                modelName: "gemini-2.5-flash",
+                systemInstruction,
+                prompt
+            })
         });
 
-        const prompt = `
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || `Server Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data.text;
+    } catch (error) {
+        console.error("Backend Call Failed:", error);
+        throw error;
+    }
+};
+
+export const analyzeCV = async (cvText, jobDescription) => {
+    const systemInstruction = `You are a hiring manager and recruiter for this specific role. Today's date is ${new Date().toLocaleDateString()}. You are reviewing CVs quickly and deciding who to interview. You scan CVs quickly and reject weak ones without hesitation. Be strict, realistic, and specific. Your goal is to help this candidate improve enough to be interview-worthy. You MUST respond in valid JSON format.`;
+
+    const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
@@ -38,38 +52,28 @@ RULES:
 - Be concise, blunt, and practical.
 `;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
-        console.log("Raw Gemini Response:", responseText);
+    const responseText = await callBackend(prompt, systemInstruction);
 
-        // Attempt to parse directly since we requested application/json
-        try {
-            return JSON.parse(responseText);
-        } catch (parseError) {
-            console.warn("Direct JSON parse failed, attempting regex extraction...", parseError);
-            const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-            if (jsonMatch) {
-                return JSON.parse(jsonMatch[0]);
-            }
-            throw new Error("Could not find valid JSON in response.");
+    // Attempt to parse JSON
+    try {
+        return JSON.parse(responseText);
+    } catch (parseError) {
+        console.warn("Direct JSON parse failed, attempting regex extraction...", parseError);
+        const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+            return JSON.parse(jsonMatch[0]);
         }
-    } catch (err) {
-        console.error("Gemini Client Error Details:", err);
-        throw err;
+        throw new Error("Could not find valid JSON in response.");
     }
 };
 
 export const generatePerfectCV = async (jobDescription, currentCv) => {
-    try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            systemInstruction: `You are a senior hiring manager and resume coach. 
+    const systemInstruction = `You are a senior hiring manager and resume coach. 
 You have to create an ideal CV for a candidate applying to a specific role. 
 Focus on ATS optimization, keyword inclusion, clear structure, and role-specific positioning. 
-Do not assume any candidate background unless provided; invent realistic, plausible experience if needed for demonstration purposes, but keep it credible for a graduate/early-career applicant.`
-        });
+Do not assume any candidate background unless provided; invent realistic, plausible experience if needed for demonstration purposes, but keep it credible for a graduate/early-career applicant.`;
 
-        const prompt = `
+    const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
@@ -92,24 +96,15 @@ RULES:
 - Output as plain text, ready to copy into a CV template.
 `;
 
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-    } catch (err) {
-        console.error("Gemini Perfect CV Error:", err);
-        throw err;
-    }
+    return await callBackend(prompt, systemInstruction);
 };
 
 export const generateCoverLetter = async (jobDescription, currentCv) => {
-    try {
-        const model = genAI.getGenerativeModel({
-            model: "gemini-2.5-flash",
-            systemInstruction: `You are a professional recruiter and career coach. 
+    const systemInstruction = `You are a professional recruiter and career coach. 
 You write persuasive, concise, and tailored cover letters for applicants, highlighting relevant experience, skills, and motivation for a specific role. 
-The letter should feel professional, human, and genuine, not generic.`
-        });
+The letter should feel professional, human, and genuine, not generic.`;
 
-        const prompt = `
+    const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
@@ -130,10 +125,5 @@ RULES:
 - End with a strong, polite closing statement
 `;
 
-        const result = await model.generateContent(prompt);
-        return result.response.text();
-    } catch (err) {
-        console.error("Gemini Cover Letter Error:", err);
-        throw err;
-    }
+    return await callBackend(prompt, systemInstruction);
 };
