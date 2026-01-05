@@ -68,61 +68,69 @@ RULES:
 };
 
 export const generatePerfectCV = async (jobDescription, currentCv) => {
-    const systemInstruction = `You are a senior hiring manager and resume coach. 
-You have to create an ideal CV for a candidate applying to a specific role. 
-Focus on ATS optimization, keyword inclusion, clear structure, and role-specific positioning. 
-Do not assume any candidate background unless provided; invent realistic, plausible experience if needed for demonstration purposes, but keep it credible for a graduate/early-career applicant.`;
+    const systemInstruction = `You are a senior hiring manager and professional CV writer.
+You specialise in tailoring CVs for specific roles while maintaining truthfulness, ATS compatibility, and recruiter readability.
+You must not invent experience, qualifications, or achievements that are not present in the original CV.
+Your goal is to maximise the candidate’s chances of being shortlisted for this role.`;
 
     const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
-OPTIONAL: CURRENT CV:
-${currentCv || "Not provided - please generate a realistic template based on the JD."}
+CANDIDATE'S CURRENT CV:
+${currentCv || "No CV provided. Create a realistic, high-quality template specifically for this role."}
 
 TASK:
-Generate a complete CV optimized for this role. Include:
-- Professional Summary / Objective
-- Skills
-- Education
-- Work Experience / Projects (realistic and tailored to the role)
-- Certifications if relevant
-- Achievements or notable projects
+Rewrite and tailor the CV specifically for this role.
 
-RULES:
-- Use role-specific keywords from the job description.
-- Focus on clarity, impact, and recruiter readability.
-- Do not include irrelevant or unprofessional information.
-- Output as plain text, ready to copy into a CV template.
+REQUIREMENTS:
+- Maximum length: 2 pages
+- Use clear professional headings and bullet points
+- Strongly prioritise skills, experience, and achievements relevant to the job description
+- Quantify achievements where possible, but ONLY if supported by the original CV
+- Optimise for ATS by naturally incorporating keywords from the job description
+- Maintain a modern, professional, recruiter-friendly format
+- Reframe existing experience to emphasise relevance, but DO NOT invent new roles, tools, or qualifications
+- Remove or downplay irrelevant content
+
+OUTPUT FORMAT:
+Return a complete, clean, ready-to-submit CV in plain text.
+Do not include explanations, commentary, or formatting instructions.
 `;
 
     return await callBackend(prompt, systemInstruction);
 };
 
 export const generateCoverLetter = async (jobDescription, currentCv) => {
-    const systemInstruction = `You are a professional recruiter and career coach. 
-You write persuasive, concise, and tailored cover letters for applicants, highlighting relevant experience, skills, and motivation for a specific role. 
-The letter should feel professional, human, and genuine, not generic.`;
+    const systemInstruction = `You are a senior recruiter and professional career writer.
+You write concise, persuasive, role-specific cover letters that sound confident, human, and authentic.
+You strictly avoid exaggeration, repetition, or false claims.`;
 
     const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
-CANDIDATE INFO:
-${currentCv || "Not provided - please base on typical qualifications for this role."}
+CANDIDATE'S CV:
+${currentCv || "No CV provided. Write a strong, generic cover letter for this role."}
 
 TASK:
-Write a tailored cover letter for the role. Include:
-- Why the candidate is interested in this position and company
-- Key relevant skills and experiences
-- How the candidate will add value
-- Professional and concise tone
+Write a tailored cover letter for this role.
 
-RULES:
-- 1 page max (200-300 words)
-- Use role-specific keywords naturally
-- Do not include exaggerations or false claims
-- End with a strong, polite closing statement
+REQUIREMENTS:
+- Maximum length: 1 page (200–300 words)
+- Exactly 4 paragraphs, structured as follows:
+  1. Introduction and motivation for the role and company
+  2. Most relevant skills and experience aligned to the job description
+  3. Key achievements or value the candidate brings (do not repeat CV bullets)
+  4. Professional closing with a clear, confident call to action
+- Align closely with the job description and company values
+- Professional, confident, and engaging tone
+- Do NOT repeat the CV verbatim
+- Do NOT add false or unverified information
+
+OUTPUT FORMAT:
+Return a clean, ready-to-send cover letter in plain text.
+Do not include explanations or notes.
 `;
 
     return await callBackend(prompt, systemInstruction);
