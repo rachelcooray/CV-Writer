@@ -147,49 +147,57 @@ RULES:
 - Do NOT give percentages.
 - Do NOT rewrite the entire CV.
 - Be concise, blunt, and practical.
-`,i=await callBackend(a,n);try{return JSON.parse(i)}catch(s){console.warn("Direct JSON parse failed, attempting regex extraction...",s);const r=i.match(/\{[\s\S]*\}/);if(r)return JSON.parse(r[0]);throw new Error("Could not find valid JSON in response.")}},generatePerfectCV=async(e,t)=>{const n=`You are a senior hiring manager and resume coach. 
-You have to create an ideal CV for a candidate applying to a specific role. 
-Focus on ATS optimization, keyword inclusion, clear structure, and role-specific positioning. 
-Do not assume any candidate background unless provided; invent realistic, plausible experience if needed for demonstration purposes, but keep it credible for a graduate/early-career applicant.`,a=`
+`,i=await callBackend(a,n);try{return JSON.parse(i)}catch(s){console.warn("Direct JSON parse failed, attempting regex extraction...",s);const r=i.match(/\{[\s\S]*\}/);if(r)return JSON.parse(r[0]);throw new Error("Could not find valid JSON in response.")}},generatePerfectCV=async(e,t)=>{const n=`You are a senior hiring manager and professional CV writer.
+You specialise in tailoring CVs for specific roles while maintaining truthfulness, ATS compatibility, and recruiter readability.
+You must not invent experience, qualifications, or achievements that are not present in the original CV.
+Your goal is to maximise the candidate’s chances of being shortlisted for this role.`,a=`
 JOB DESCRIPTION:
 ${e}
 
-OPTIONAL: CURRENT CV:
-${t||"Not provided - please generate a realistic template based on the JD."}
+CANDIDATE'S CURRENT CV:
+${t||"No CV provided. Create a realistic, high-quality template specifically for this role."}
 
 TASK:
-Generate a complete CV optimized for this role. Include:
-- Professional Summary / Objective
-- Skills
-- Education
-- Work Experience / Projects (realistic and tailored to the role)
-- Certifications if relevant
-- Achievements or notable projects
+Rewrite and tailor the CV specifically for this role.
 
-RULES:
-- Use role-specific keywords from the job description.
-- Focus on clarity, impact, and recruiter readability.
-- Do not include irrelevant or unprofessional information.
-- Output as plain text, ready to copy into a CV template.
-`;return await callBackend(a,n)},generateCoverLetter=async(e,t)=>{const n=`You are a professional recruiter and career coach. 
-You write persuasive, concise, and tailored cover letters for applicants, highlighting relevant experience, skills, and motivation for a specific role. 
-The letter should feel professional, human, and genuine, not generic.`,a=`
+REQUIREMENTS:
+- Maximum length: 2 pages
+- Use clear professional headings and bullet points
+- Strongly prioritise skills, experience, and achievements relevant to the job description
+- Quantify achievements where possible, but ONLY if supported by the original CV
+- Optimise for ATS by naturally incorporating keywords from the job description
+- Maintain a modern, professional, recruiter-friendly format
+- Reframe existing experience to emphasise relevance, but DO NOT invent new roles, tools, or qualifications
+- Remove or downplay irrelevant content
+
+OUTPUT FORMAT:
+Return a complete, clean, ready-to-submit CV in plain text.
+Do not include explanations, commentary, or formatting instructions.
+`;return await callBackend(a,n)},generateCoverLetter=async(e,t)=>{const n=`You are a senior recruiter and professional career writer.
+You write concise, persuasive, role-specific cover letters that sound confident, human, and authentic.
+You strictly avoid exaggeration, repetition, or false claims.`,a=`
 JOB DESCRIPTION:
 ${e}
 
-CANDIDATE INFO:
-${t||"Not provided - please base on typical qualifications for this role."}
+CANDIDATE'S CV:
+${t||"No CV provided. Write a strong, generic cover letter for this role."}
 
 TASK:
-Write a tailored cover letter for the role. Include:
-- Why the candidate is interested in this position and company
-- Key relevant skills and experiences
-- How the candidate will add value
-- Professional and concise tone
+Write a tailored cover letter for this role.
 
-RULES:
-- 1 page max (200-300 words)
-- Use role-specific keywords naturally
-- Do not include exaggerations or false claims
-- End with a strong, polite closing statement
+REQUIREMENTS:
+- Maximum length: 1 page (200–300 words)
+- Exactly 4 paragraphs, structured as follows:
+  1. Introduction and motivation for the role and company
+  2. Most relevant skills and experience aligned to the job description
+  3. Key achievements or value the candidate brings (do not repeat CV bullets)
+  4. Professional closing with a clear, confident call to action
+- Align closely with the job description and company values
+- Professional, confident, and engaging tone
+- Do NOT repeat the CV verbatim
+- Do NOT add false or unverified information
+
+OUTPUT FORMAT:
+Return a clean, ready-to-send cover letter in plain text.
+Do not include explanations or notes.
 `;return await callBackend(a,n)};function App(){const[e,t]=reactExports.useState(""),[n,a]=reactExports.useState(null),[i,s]=reactExports.useState(""),[r,p]=reactExports.useState(!1),[g,S]=reactExports.useState(!1),[v,P]=reactExports.useState(null),[C,_]=reactExports.useState(null),[k,w]=reactExports.useState("feedback"),[R,u]=reactExports.useState(null),d=async E=>{if(E&&E.type==="application/pdf"){p(!0),u(null);try{const f=await extractPdfText(E),A=preprocessText(f,"cv");A.length<50&&u("Warning: Extracted text looks too short. The PDF might be an image or corrupted."),s(A),a(E)}catch(f){console.error("Extraction Failed:",f),u(`Extraction Failed: ${f.message}`)}finally{p(!1)}}else u("Please upload a valid PDF file.")},b=async E=>{if(!e){u("Please enter a job description first.");return}S(!0),P(null),_(null),u(null),w(E);try{const f=preprocessText(e,"jd");if(E==="feedback"){if(!i){u("Please upload a CV to get feedback."),S(!1);return}const A=await analyzeCV(i,f);P(A)}else if(E==="cv"){const A=await generatePerfectCV(f,i);_(A)}else if(E==="cover-letter"){const A=await generateCoverLetter(f,i);_(A)}}catch(f){console.error("Action Failed:",f),u(`Action Failed: ${f.message||"Check your network and API key"}`)}finally{S(!1)}};return jsxRuntimeExports.jsxs("div",{className:"container",children:[jsxRuntimeExports.jsxs("header",{children:[jsxRuntimeExports.jsx("h1",{children:"Rachel Cooray's CV writing Assistant"}),jsxRuntimeExports.jsx("p",{children:"Expert CV fixes from a Hiring Manager's perspective."})]}),R&&jsxRuntimeExports.jsxs("div",{className:"error-banner",children:[jsxRuntimeExports.jsx(CircleAlert,{size:20}),jsxRuntimeExports.jsx("span",{children:R})]}),jsxRuntimeExports.jsxs("div",{className:"input-grid",children:[jsxRuntimeExports.jsx(JDInput,{value:e,onChange:t}),jsxRuntimeExports.jsx(CVUpload,{file:n,onFileChange:d,isExtracting:r})]}),jsxRuntimeExports.jsxs("div",{className:"action-buttons-container",children:[jsxRuntimeExports.jsxs("button",{className:"btn-action",onClick:()=>b("feedback"),disabled:g||!i||!e,children:[g&&k==="feedback"?jsxRuntimeExports.jsx("div",{className:"spinner-sm"}):jsxRuntimeExports.jsx(CircleCheckBig,{size:18}),"Get Feedback"]}),jsxRuntimeExports.jsxs("button",{className:"btn-action",onClick:()=>b("cv"),disabled:g||!e,children:[g&&k==="cv"?jsxRuntimeExports.jsx("div",{className:"spinner-sm"}):jsxRuntimeExports.jsx(FileText,{size:18}),"Generate Perfect CV"]}),jsxRuntimeExports.jsxs("button",{className:"btn-action",onClick:()=>b("cover-letter"),disabled:g||!e,children:[g&&k==="cover-letter"?jsxRuntimeExports.jsx("div",{className:"spinner-sm"}):jsxRuntimeExports.jsx(Mail,{size:18}),"Generate Cover Letter"]})]}),v&&jsxRuntimeExports.jsx(Results,{result:v}),C&&jsxRuntimeExports.jsx("div",{className:"results-panel",children:jsxRuntimeExports.jsxs("div",{className:"generated-content-card",children:[jsxRuntimeExports.jsxs("div",{className:"content-header",children:[jsxRuntimeExports.jsx("h2",{children:k==="cv"?"Optimized CV Draft":"Tailored Cover Letter"}),jsxRuntimeExports.jsx("button",{className:"btn-copy",onClick:()=>navigator.clipboard.writeText(C),children:"Copy Text"})]}),jsxRuntimeExports.jsx("pre",{className:"content-body",children:C})]})})]})}ReactDOM.createRoot(document.getElementById("root")).render(jsxRuntimeExports.jsx(React$2.StrictMode,{children:jsxRuntimeExports.jsx(App,{})}));
