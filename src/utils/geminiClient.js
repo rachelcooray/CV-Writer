@@ -71,14 +71,15 @@ export const generatePerfectCV = async (jobDescription, currentCv) => {
     const systemInstruction = `You are a senior hiring manager and professional CV writer.
 You specialise in tailoring CVs for specific roles while maintaining truthfulness, ATS compatibility, and recruiter readability.
 You must not invent experience, qualifications, or achievements that are not present in the original CV.
-Your goal is to maximise the candidate’s chances of being shortlisted for this role.`;
+Your goal is to maximise the candidate’s chances of being shortlisted for this role.
+STRICT RULE: DO NOT INVENT FACTS. ONLY USE INFO FROM THE CANDIDATE'S CV.`;
 
     const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
 CANDIDATE'S CURRENT CV:
-${currentCv || "No CV provided. Create a realistic, high-quality template specifically for this role."}
+${currentCv || "No CV provided. Create a template structure only."}
 
 TASK:
 Rewrite and tailor the CV specifically for this role.
@@ -92,6 +93,7 @@ REQUIREMENTS:
 - Maintain a modern, professional, recruiter-friendly format
 - Reframe existing experience to emphasise relevance, but DO NOT invent new roles, tools, or qualifications
 - Remove or downplay irrelevant content
+- STRICTLY NO HALLUCINATIONS: If the CV does not mention a specific skill required by the JD, DO NOT add it.
 
 OUTPUT FORMAT:
 Return a complete, clean, ready-to-submit CV in plain text.
@@ -104,14 +106,15 @@ Do not include explanations, commentary, or formatting instructions.
 export const generateCoverLetter = async (jobDescription, currentCv) => {
     const systemInstruction = `You are a senior recruiter and professional career writer.
 You write concise, persuasive, role-specific cover letters that sound confident, human, and authentic.
-You strictly avoid exaggeration, repetition, or false claims.`;
+You strictly avoid exaggeration, repetition, or false claims.
+STRICT RULE: DO NOT INVENT FACTS. ONLY USE INFO FROM THE CANDIDATE'S CV.`;
 
     const prompt = `
 JOB DESCRIPTION:
 ${jobDescription}
 
 CANDIDATE'S CV:
-${currentCv || "No CV provided. Write a strong, generic cover letter for this role."}
+${currentCv || "No CV provided. Write a template cover letter structure."}
 
 TASK:
 Write a tailored cover letter for this role.
@@ -127,6 +130,7 @@ REQUIREMENTS:
 - Professional, confident, and engaging tone
 - Do NOT repeat the CV verbatim
 - Do NOT add false or unverified information
+- STRICTLY NO HALLUCINATIONS: Do not claim experience the candidate does not have.
 
 OUTPUT FORMAT:
 Return a clean, ready-to-send cover letter in plain text.
