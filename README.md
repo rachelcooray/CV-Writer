@@ -1,53 +1,68 @@
-# Rachel Cooray's CV writing Assistant
+# CV Writing Assistant
 
-A modern, minimalist tool designed to provide high-value, actionable CV feedback from a hiring manager's perspective. No scoring fluff—just direct fixes to help you get the interview.
+A powerful, AI-driven tool to help job seekers optimize their CVs and generate tailored application materials. Now features a secure Node.js backend architecture.
+
+![UI Screenshot](https://rachelcooray.github.io/CV-Writer/assets/ui-preview.png)
 
 ## Features
 
-- **Reliable PDF Parsing**: Extracts text while preserving section order.
-- **AI-Powered Analysis**: Uses Gemini 2.5 Flash to identify rejection risks and missing keywords.
-- **Actionable Advice**: Provides bullet-level rewrite suggestions and a prioritized "Top 5 Fixes" list.
-- **Minimalist Aesthetic**: Premium, distraction-free UI with Lucide-React icons.
+- **Analyze & Feedback**: Get strict, hiring-manager-level feedback on your CV against a specific Job Description.
+- **Generate Perfect CV**: Create a completely new, ATS-optimized CV draft tailored to the role.
+- **Generate Cover Letter**: Write a persuasive, 1-page cover letter matching your experience to the job.
+- **Privacy First**: API keys are secured server-side; no credentials are exposed to the browser.
+- **Modern UI**: Glass-morphism design with a vibrant "Green-Blue-Purple" gradient theme.
 
-## Prerequisites
+## Architecture
 
-- **Node.js**: `v20.19.0`+ or `v22.12.0`+ (Recommended).
-  *Note: The project is currently configured to run on version `20.3.0` for compatibility.*
-- **NPM**: `v9` or later.
+This project uses a hybrid architecture for security:
+- **Frontend**: React + Vite (Static UI)
+- **Backend**: Node.js + Express (Secure Proxy for Gemini API)
+
+The frontend sends requests to `/api/analyze`, and the backend forwards them to Google's Gemini API using the secure server-side API key.
 
 ## Quick Start
 
-1. **Navigate to the project root**:
-   ```bash
-   cd CV-Writer
-   ```
+1.  **Clone the repository**:
+    ```bash
+    git clone https://github.com/rachelcooray/CV-Writer.git
+    cd CV-Writer
+    ```
 
-2. **Install dependencies**:
-   ```bash
-   npm install
-   ```
+2.  **Install dependencies**:
+    ```bash
+    npm install
+    ```
 
-3. **Set up Gemini API Key**:
-   Update the `GEMINI_API_KEY` in `src/utils/geminiClient.js` with your own key.
+3.  **Configure Environment**:
+    Create a `.env` file in the root directory:
+    ```env
+    VITE_GEMINI_API_KEY=your_google_gemini_api_key
+    PORT=3000
+    ```
 
-4. **Run the development server**:
-   ```bash
-   npm run dev
-   ```
+4.  **Run Locally**:
+    ```bash
+    # Runs the backend server (which serves the built frontend)
+    npm run build
+    npm run start
+    ```
+    Open [http://localhost:3000](http://localhost:3000).
 
-5. **Access the application**:
-   Open [http://localhost:5173](http://localhost:5173) in your browser.
+    *For frontend-only dev mode (API calls will fail without proxy): `npm run dev`*
+
+## Deployment (Render)
+
+This project is configured for **Render** Web Services.
+
+1.  Connect your GitHub repo to Render.
+2.  **Runtime**: Node
+3.  **Build Command**: `npm install && npm run build`
+4.  **Start Command**: `npm run start`
+5.  **Environment Variables**: Add `VITE_GEMINI_API_KEY`.
 
 ## Built With
 
-- [React](https://reactjs.org/)
-- [Vite](https://vitejs.dev/)
-- [Google Generative AI SDK](https://github.com/google/generative-ai-js)
-- [PDF.js](https://mozilla.github.io/pdf.js/)
-- [Lucide React](https://lucide.dev/)
-
-## Project Structure
-
-- `src/components`: UI elements (Inputs, Upload, Results).
-- `src/utils`: Core logic (PDF extraction, Text cleaning, Gemini API client).
-
+- **AI**: Google Gemini 2.5 Flash
+- **Frontend**: React, Vite, Framer Motion (removed), Lucide React
+- **Backend**: Express.js
+- **Parsing**: PDF.js
